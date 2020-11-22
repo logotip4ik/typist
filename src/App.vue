@@ -23,8 +23,7 @@
 </template>
 
 <script>
-// eslint-disable-next-line
-import { ref, computed, onMounted, reactive, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 
 export default {
