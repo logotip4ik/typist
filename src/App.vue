@@ -2,12 +2,19 @@
   <h1>🎉 Typist 🎉</h1>
   <div class="main">
     <p>
-      <span v-for="(word, idx) in textWords" :key="idx" :class="{ 'passed-word': idx < currWord }">
-        <span :class="{ 'curr-word': idx === currWord }">{{ word }}</span>
-        {{ ' ' }}
+      <span
+        v-for="(letter, idx) in textRaw"
+        :key="idx"
+        :class="{
+          'curr-letter': idx === currLetter,
+          'passed-letter': idx < currLetter,
+          'wrong-letter': userText[idx] !== letter && idx < currLetter,
+        }"
+        >{{ letter }}
       </span>
     </p>
-    <input ref="input" v-model="userInput" />
+    {{ userText[currLetter] }}
+    <input ref="input" v-model="userInputRaw" :oninput="addLetter" />
   </div>
   <button @click="getText" class="restart"><span class="material-icons">autorenew</span></button>
   <transition name="fade" mode="out-in">
@@ -16,7 +23,8 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+// eslint-disable-next-line
+import { ref, computed, onMounted, reactive, watch } from 'vue';
 import axios from 'axios';
 
 export default {
@@ -28,6 +36,10 @@ export default {
 
     const loading = ref(true);
     const currWord = ref(0);
+    const currLetter = ref(0);
+    const userText = ref([]);
+    const currUserWord = ref([]);
+    const userInputRaw = ref('');
 
     const textRaw = ref([]);
     const textWords = computed(() => textRaw.value.join('').split(' '));
@@ -35,29 +47,41 @@ export default {
 
     function getText() {
       loading.value = true;
+      currWord.value = 0;
+      currLetter.value = 0;
+      userText.value = [];
+      currUserWord.value = [];
       axios.get(URL).then(({ data }) => {
         textRaw.value = data.content.split('');
         loading.value = false;
       });
     }
 
-    const userInputRaw = ref('');
-    const userInput = computed({
-      get: () => userInputRaw.value,
-      set: (val) => {
-        if (val.slice(-1) === ' ') {
-          if (textWords.value[currWord.value] === val.trim()) {
+    function addLetter({ data }) {
+      if (data === ' ') {
+        if (currUserWord.value.join('').length === textWords.value[currWord.value].length) {
+          userText.value.push(data);
+          currLetter.value += 1;
+          if (textWords.value[currWord.value] === currUserWord.value.join('')) {
+            currUserWord.value = [];
+            currWord.value += 1;
             userInputRaw.value = '';
-            if (currWord.value === textWords.value.length - 1) {
-              currWord.value = 0;
+            if (currWord.value === textWords.value.length) {
               getText();
-            } else currWord.value += 1;
+            }
           }
           return;
         }
-        userInputRaw.value = val;
-      },
-    });
+      } else if (data === null) {
+        currLetter.value -= 1;
+        userText.value.pop();
+        currUserWord.value.pop();
+        return;
+      }
+      currLetter.value += 1;
+      userText.value.push(data);
+      currUserWord.value.push(data);
+    }
 
     getText();
 
@@ -66,10 +90,14 @@ export default {
     return {
       loading,
       text,
+      textRaw,
       textWords,
       currWord,
-      userInput,
+      currLetter,
+      userText,
+      userInputRaw,
       getText,
+      addLetter,
       input,
     };
   },
@@ -119,23 +147,37 @@ export default {
   .main {
     margin: 0 auto;
     padding: 1rem;
-    text-align: center;
     max-width: 700px;
 
-    .passed-word {
+    .passed-letter {
       background: rgba(lightgreen, 0.5);
     }
-    .curr-word {
-      background: rgba(cyan, 0.4);
+    .curr-letter {
+      &::after {
+        content: ' ';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: rgba(cyan, 1);
+        animation: loading 1s infinite ease-out;
+      }
+    }
+    .wrong-letter {
+      &::after {
+      }
+      outline: 2px solid rgba(red, 0.5);
+      background: transparent !important;
     }
 
     p {
+      text-align: center;
       font-size: 30px;
-      margin: 0 auto;
-      max-width: 600px;
-      line-height: 1.1;
+      word-wrap: break-word;
 
       span {
+        position: relative;
         transition: background 100ms linear;
       }
     }
