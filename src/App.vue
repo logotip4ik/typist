@@ -56,12 +56,27 @@ export default {
       });
     }
 
+    // set: (val) => {
+    //     if (val.slice(-1) === ' ') {
+    //       if (textWords.value[currWord.value] === val.trim()) {
+    //         userInputRaw.value = '';
+    //         if (currWord.value === textWords.value.length - 1) {
+    //           currWord.value = 0;
+    //           getText();
+    //         } else currWord.value += 1;
+    //       }
+    //       return;
+    //     }
+    //     userInputRaw.value = val;
+    //   },
+
     function addLetter({ data }) {
       if (data === ' ') {
-        if (currUserWord.value.join('').length === textWords.value[currWord.value].length) {
+        // prettier-ignore
+        if (currUserWord.value.join('').trim().length + 1 >= textWords.value[currWord.value].length) {
           userText.value.push(data);
           currLetter.value += 1;
-          if (textWords.value[currWord.value] === currUserWord.value.join('')) {
+          if (textWords.value[currWord.value] === currUserWord.value.join('').trim()) {
             currUserWord.value = [];
             currWord.value += 1;
             userInputRaw.value = '';
@@ -164,8 +179,17 @@ export default {
       }
     }
     .wrong-letter {
-      &::after {
-      }
+      // &::after {
+      //   content: '';
+      //   position: absolute;
+      //   top: -1px;
+      //   left: 50%;
+      //   transform: translateX(-50%);
+      //   height: 5px;
+      //   width: 5px;
+      //   border-radius: 50%;
+      //   background: red;
+      // }
       outline: 2px solid rgba(red, 0.5);
       background: transparent !important;
     }
