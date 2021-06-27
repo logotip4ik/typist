@@ -3,7 +3,7 @@
   <div class="main">
     <p>
       <span
-        v-for="(letter, idx) in textRaw"
+        v-for="(letter, idx) in rawText"
         :key="idx"
         :class="{
           'curr-letter': idx === currLetter,
@@ -13,10 +13,11 @@
         >{{ letter }}
       </span>
     </p>
-    {{ userText[currLetter] }}
-    <input ref="input" v-model="userInputRaw" :oninput="addLetter" />
+    <input ref="input" @input="addValue" />
   </div>
-  <button @click="getText" class="restart"><span class="material-icons">autorenew</span></button>
+  <button @click="getText" class="restart">
+    <span class="material-icons">autorenew</span>
+  </button>
   <transition name="fade" mode="out-in">
     <div v-if="loading" class="overlay"></div>
   </transition>
@@ -34,67 +35,46 @@ export default {
     const input = ref(null);
 
     const loading = ref(true);
-    const currWord = ref(0);
     const currLetter = ref(0);
     const userText = ref([]);
-    const currUserWord = ref([]);
-    const userInputRaw = ref('');
+    const rawText = ref([]);
 
-    const textRaw = ref([]);
-    const textWords = computed(() => textRaw.value.join('').split(' '));
-    const text = computed(() => textRaw.value.join(''));
+    const text = computed(() => rawText.value.join(''));
 
     function getText() {
       loading.value = true;
-      currWord.value = 0;
       currLetter.value = 0;
       userText.value = [];
-      currUserWord.value = [];
       axios.get(URL).then(({ data }) => {
-        textRaw.value = data.content.split('');
+        rawText.value = data.content.split('');
         loading.value = false;
       });
     }
 
-    // set: (val) => {
-    //     if (val.slice(-1) === ' ') {
-    //       if (textWords.value[currWord.value] === val.trim()) {
-    //         userInputRaw.value = '';
-    //         if (currWord.value === textWords.value.length - 1) {
-    //           currWord.value = 0;
-    //           getText();
-    //         } else currWord.value += 1;
-    //       }
-    //       return;
-    //     }
-    //     userInputRaw.value = val;
-    //   },
+    function isWordsCorrect() {
+      let isCorrect = true;
 
-    function addLetter({ data }) {
-      if (data === ' ') {
-        // prettier-ignore
-        if (currUserWord.value.join('').trim().length + 1 >= textWords.value[currWord.value].length) {
-          userText.value.push(data);
-          currLetter.value += 1;
-          if (textWords.value[currWord.value] === currUserWord.value.join('').trim()) {
-            currUserWord.value = [];
-            currWord.value += 1;
-            userInputRaw.value = '';
-            if (currWord.value === textWords.value.length) {
-              getText();
-            }
-          }
-          return;
+      for (let i = 0; i < rawText.value.slice(0, currLetter.value).length; i += 1) {
+        if (userText.value[i] !== rawText.value[i]) {
+          isCorrect = false;
+          break;
         }
-      } else if (data === null) {
+      }
+
+      return isCorrect;
+    }
+
+    function addValue({ target, inputType, data }) {
+      if (inputType === 'insertText') {
+        userText.value.push(target.value[target.value.length - 1]);
+        currLetter.value += 1;
+        const isCorrect = isWordsCorrect();
+        if (data === ' ' && isCorrect) input.value.value = '';
+        if (currLetter.value > rawText.value.length && isCorrect) getText();
+      } else if (inputType === 'deleteContentBackward') {
         currLetter.value -= 1;
         userText.value.pop();
-        currUserWord.value.pop();
-        return;
       }
-      currLetter.value += 1;
-      userText.value.push(data);
-      currUserWord.value.push(data);
     }
 
     getText();
@@ -104,14 +84,11 @@ export default {
     return {
       loading,
       text,
-      textRaw,
-      textWords,
-      currWord,
+      rawText,
       currLetter,
       userText,
-      userInputRaw,
       getText,
-      addLetter,
+      addValue,
       input,
     };
   },
@@ -180,18 +157,19 @@ export default {
     }
     .wrong-letter {
       // &::after {
+      //   $dot-size: 10px;
       //   content: '';
       //   position: absolute;
-      //   top: -1px;
+      //   top: -3px;
       //   left: 50%;
       //   transform: translateX(-50%);
-      //   height: 5px;
-      //   width: 5px;
+      //   height: $dot-size;
+      //   width: $dot-size;
       //   border-radius: 50%;
       //   background: red;
       // }
-      outline: 2px solid rgba(red, 0.5);
-      background: transparent !important;
+      // outline: 2px solid rgba(red, 0.5);
+      background: rgba($color: red, $alpha: 0.5) !important;
     }
 
     p {
