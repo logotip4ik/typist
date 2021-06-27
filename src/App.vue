@@ -45,11 +45,11 @@ export default {
       loading.value = true;
       currLetter.value = 0;
       userText.value = [];
-      input.value.value = '';
+      if (input.value) input.value.value = '';
       axios.get(URL).then(({ data }) => {
         rawText.value = data.content.split('');
         loading.value = false;
-        input.value.focus();
+        if (input.value) input.value.focus();
       });
     }
 
