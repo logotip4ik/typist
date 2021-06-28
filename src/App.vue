@@ -1,7 +1,7 @@
 <template>
   <h1>🎉 Typist 🎉</h1>
   <div class="main">
-    <p>
+    <p class="main__text">
       <span
         v-for="(letter, idx) in rawText"
         :key="idx"
@@ -13,7 +13,8 @@
         >{{ letter }}
       </span>
     </p>
-    <input ref="input" @input="addValue" />
+    <span class="main__by">By - {{ authorText }}</span>
+    <input ref="input" class="main__input" @input="addValue" />
   </div>
   <button @click="getText" class="restart">
     <span class="material-icons">autorenew</span>
@@ -39,6 +40,7 @@ export default {
     const currLetter = ref(0);
     const userText = ref([]);
     const rawText = ref([]);
+    const authorText = ref('');
 
     const text = computed(() => rawText.value.join(''));
 
@@ -56,6 +58,7 @@ export default {
       axios.get(url).then(({ data }) => {
         // eslint-disable-next-line
         setQueryParams(data._id);
+        authorText.value = data.author;
         rawText.value = data.content.split('');
         loading.value = false;
         if (input.value) input.value.focus();
@@ -98,6 +101,7 @@ export default {
       rawText,
       currLetter,
       userText,
+      authorText,
       getText,
       addValue,
       input,
@@ -154,36 +158,21 @@ export default {
     .passed-letter {
       background: rgba(lightgreen, 0.5);
     }
-    .curr-letter {
-      &::after {
-        content: ' ';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: rgba(cyan, 1);
-        animation: loading 1s infinite ease-out;
-      }
+    .curr-letter::after {
+      content: ' ';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(cyan, 1);
+      animation: loading 1s infinite ease-out;
     }
     .wrong-letter {
-      // &::after {
-      //   $dot-size: 10px;
-      //   content: '';
-      //   position: absolute;
-      //   top: -3px;
-      //   left: 50%;
-      //   transform: translateX(-50%);
-      //   height: $dot-size;
-      //   width: $dot-size;
-      //   border-radius: 50%;
-      //   background: red;
-      // }
-      // outline: 2px solid rgba(red, 0.5);
-      background: rgba($color: red, $alpha: 0.5) !important;
+      background: rgba($color: red, $alpha: 0.5);
     }
 
-    p {
+    &__text {
       text-align: center;
       font-size: 30px;
       word-wrap: break-word;
@@ -193,8 +182,14 @@ export default {
         transition: background 100ms linear;
       }
     }
-
-    input {
+    &__by {
+      display: block;
+      text-align: right;
+      font-style: italic;
+      margin-top: 1rem;
+      color: rgba($color: whitesmoke, $alpha: 0.6);
+    }
+    &__input {
       color: white;
       padding: 1rem;
       margin-top: 5rem;
@@ -208,27 +203,26 @@ export default {
       outline: none;
     }
   }
+}
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #18181e;
 
-  .overlay {
+  &::after {
+    content: '';
     position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #18181e;
-
-    &::after {
-      content: '';
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 50px;
-      height: 50px;
-      background-color: cyan;
-      border-radius: 50%;
-      animation: loading 1s infinite;
-    }
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    background-color: cyan;
+    border-radius: 50%;
+    animation: loading 1s infinite;
   }
 }
 
