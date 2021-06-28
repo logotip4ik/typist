@@ -23,9 +23,17 @@ export default {
     provide('results', results);
 
     function toggleView(res) {
+      loading.value = true;
       if (res.data) results.value = res.data;
-      if (res.next) results.value.getText();
-      view.value = res.to;
+      if (res.next) {
+        results.value.getText().then(() => {
+          view.value = res.to;
+          loading.value = false;
+        });
+      } else {
+        view.value = res.to;
+        loading.value = false;
+      }
     }
 
     return { loading, view, toggleView };

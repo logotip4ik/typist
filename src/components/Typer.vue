@@ -91,13 +91,19 @@ export default {
       WPMs.value = [];
       maxWPM.value = 0;
       const url = encodeId ? `${ID_URL}${decodeURI(encodeId)}` : RANDOM_URL;
-      axios.get(url).then(({ data }) => {
-        // eslint-disable-next-line
-        setQueryParams(data._id);
-        authorText.value = data.author;
-        rawText.value = data.content.split('');
-        loading.value = false;
-        if (input.value) input.value.focus();
+      return new Promise((resolve, reject) => {
+        axios
+          .get(url)
+          .then(({ data }) => {
+            // eslint-disable-next-line
+            setQueryParams(data._id);
+            authorText.value = data.author;
+            rawText.value = data.content.split('');
+            loading.value = false;
+            if (input.value) input.value.focus();
+            resolve();
+          })
+          .catch(reject);
       });
     }
     function setTimer() {
