@@ -1,5 +1,5 @@
 <template>
-  <h1>🎉 Typist 🎉</h1>
+  <h1 class="header">🎉 Typist 🎉</h1>
   <div class="main">
     <p class="main__text">
       <span
@@ -13,12 +13,23 @@
         >{{ letter }}
       </span>
     </p>
-    <span class="main__by">By - {{ authorText }}</span>
+    <span class="main__info">
+      <span>{{ WPMText }}</span>
+      <span>By - {{ authorText }}</span></span
+    >
     <input ref="input" class="main__input" @input="addValue" />
   </div>
-  <button @click="getText" class="restart">
+  <button @click="getText" class="restart-button">
     <span class="material-icons">autorenew</span>
   </button>
+  <transition name="fade" mode="out-in">
+    <span v-if="userText.length === 0" class="top-left">
+      Start Typing
+    </span>
+    <span v-else class="top-left">
+      {{ timerText }}
+    </span>
+  </transition>
   <transition name="fade" mode="out-in">
     <div v-if="loading" class="overlay"></div>
   </transition>
@@ -38,10 +49,20 @@ export default {
 
     const loading = ref(true);
     const currLetter = ref(0);
+    const numWords = ref(0);
     const userText = ref([]);
     const rawText = ref([]);
     const authorText = ref('');
+    const timer = ref(0);
 
+    const WPMText = computed(() => `${Math.round(numWords.value / (timer.value / 60)) || 0} WPM`);
+    const timerText = computed(() => {
+      const h = Math.floor(timer.value / 3600);
+      const m = Math.floor((timer.value % 3600) / 60);
+      const s = Math.round(timer.value % 60);
+      // eslint-disable-next-line no-nested-ternary
+      return [h, m > 9 ? m : h ? `0${m}` : m || '0', s > 9 ? s : `0${s}`].filter(Boolean).join(':');
+    });
     const text = computed(() => rawText.value.join(''));
 
     function setQueryParams(quoteId) {
@@ -53,6 +74,8 @@ export default {
     function getText(encodeId) {
       loading.value = true;
       currLetter.value = 0;
+      timer.value = 0;
+      numWords.value = 0;
       userText.value = [];
       const url = encodeId ? `${ID_URL}${decodeURI(encodeId)}` : RANDOM_URL;
       axios.get(url).then(({ data }) => {
@@ -63,6 +86,11 @@ export default {
         loading.value = false;
         if (input.value) input.value.focus();
       });
+    }
+    function setTimer() {
+      setInterval(() => {
+        if (userText.value.length !== 0) timer.value += 1;
+      }, 999);
     }
 
     function isWordsCorrect() {
@@ -81,7 +109,10 @@ export default {
         userText.value.push(target.value[target.value.length - 1]);
         currLetter.value += 1;
         const isCorrect = isWordsCorrect();
-        if (data === ' ' && isCorrect) input.value.value = '';
+        if (data === ' ' && isCorrect) {
+          input.value.value = '';
+          numWords.value += 1;
+        }
         if (currLetter.value > rawText.value.length && isCorrect) getText();
       } else if (inputType === 'deleteContentBackward') {
         currLetter.value -= 1;
@@ -93,6 +124,7 @@ export default {
       const params = new URLSearchParams(window.location.search);
       getText(params.get('q'));
       input.value.focus();
+      setTimer();
     });
 
     return {
@@ -102,6 +134,8 @@ export default {
       currLetter,
       userText,
       authorText,
+      timerText,
+      WPMText,
       getText,
       addValue,
       input,
@@ -125,25 +159,7 @@ export default {
   background: #18181e;
   color: whitesmoke;
 
-  .restart {
-    appearance: none;
-    border: none;
-    outline: none;
-    background: transparent;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    color: white;
-    font-size: 36px;
-    transition: color 150ms ease-out;
-
-    &:hover,
-    :focus {
-      color: darken(white, 50);
-    }
-  }
-
-  h1 {
+  .header {
     padding-top: 5rem;
     font-size: 60px;
     text-align: center;
@@ -182,9 +198,10 @@ export default {
         transition: background 100ms linear;
       }
     }
-    &__by {
-      display: block;
-      text-align: right;
+    &__info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-style: italic;
       margin-top: 1rem;
       color: rgba($color: whitesmoke, $alpha: 0.6);
@@ -202,6 +219,36 @@ export default {
       border-radius: 0.25rem;
       outline: none;
     }
+  }
+}
+
+.top-left {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  color: rgba($color: whitesmoke, $alpha: 0.8);
+  font-size: 1.2rem;
+  &.blicking-text {
+    font-size: 1rem;
+    color: rgba($color: whitesmoke, $alpha: 0.6);
+    animation: loading 3s infinite;
+  }
+}
+.restart-button {
+  appearance: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: white;
+  font-size: 36px;
+  transition: color 150ms ease-out;
+
+  &:hover,
+  :focus {
+    color: darken(white, 50);
   }
 }
 .overlay {
