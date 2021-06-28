@@ -30,7 +30,8 @@ import axios from 'axios';
 export default {
   name: 'App',
   setup() {
-    const URL = 'https://api.quotable.io/random?minLength=50?maxLength=150';
+    const RANDOM_URL = 'https://api.quotable.io/random?minLength=50?maxLength=150';
+    const ID_URL = 'https://api.quotable.io/quotes/';
 
     const input = ref(null);
 
@@ -41,12 +42,20 @@ export default {
 
     const text = computed(() => rawText.value.join(''));
 
-    function getText() {
+    function setQueryParams(quoteId) {
+      const params = new URLSearchParams(window.location.search);
+      params.set('q', encodeURI(quoteId));
+      window.history.replaceState({}, '', `?${params.toString()}`);
+    }
+
+    function getText(encodeId) {
       loading.value = true;
       currLetter.value = 0;
       userText.value = [];
-      if (input.value) input.value.value = '';
-      axios.get(URL).then(({ data }) => {
+      const url = encodeId ? `${ID_URL}${decodeURI(encodeId)}` : RANDOM_URL;
+      axios.get(url).then(({ data }) => {
+        // eslint-disable-next-line
+        setQueryParams(data._id);
         rawText.value = data.content.split('');
         loading.value = false;
         if (input.value) input.value.focus();
@@ -55,14 +64,12 @@ export default {
 
     function isWordsCorrect() {
       let isCorrect = true;
-
       for (let i = 0; i < rawText.value.slice(0, currLetter.value).length; i += 1) {
         if (userText.value[i] !== rawText.value[i]) {
           isCorrect = false;
           break;
         }
       }
-
       return isCorrect;
     }
 
@@ -79,9 +86,11 @@ export default {
       }
     }
 
-    getText();
-
-    onMounted(() => input.value.focus());
+    onMounted(() => {
+      const params = new URLSearchParams(window.location.search);
+      getText(params.get('q'));
+      input.value.focus();
+    });
 
     return {
       loading,
