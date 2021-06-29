@@ -16,6 +16,7 @@
       </p>
       <input ref="input" class="main__input" @input="addValue" />
     </div>
+    <button class="main__restart" @click="$nuxt.refresh">&#10226;</button>
   </div>
 </template>
 
@@ -134,6 +135,24 @@ export default {
     box-shadow: 0 0 5px cyan;
     border-radius: 0.25rem;
     outline: none;
+  }
+  &__restart {
+    appearance: none;
+    border: none;
+    outline: none;
+    background: transparent;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: white;
+    font-size: 36px;
+    transition: color 150ms ease-out;
+    cursor: pointer;
+
+    &:hover,
+    :focus {
+      color: darken(white, 50);
+    }
   }
 }
 </style>
