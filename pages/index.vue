@@ -91,7 +91,7 @@ export default {
   },
   mounted() {
     const params = new URLSearchParams(window.location.search)
-    if (!params.has('q')) this.setQueryParam()
+    if (!params.get('q')) this.setQueryParam()
     this.setTimer()
     this.$refs.input.focus()
   },

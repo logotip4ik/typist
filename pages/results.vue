@@ -26,7 +26,7 @@
       <button
         ref="nextButton"
         class="button next"
-        @click="() => $router.push({ path: '/', query: { q: '' } })"
+        @click="() => $router.push({ path: '/' })"
       >
         Next
       </button>
@@ -101,6 +101,7 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  padding: 0.5rem;
 }
 .text {
   font-size: 1.2rem;
@@ -117,6 +118,7 @@ h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
 
   .button {
     border-radius: 0.25rem;
