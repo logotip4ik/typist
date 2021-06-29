@@ -90,7 +90,8 @@ export default {
     },
   },
   mounted() {
-    this.setQueryParam()
+    const params = new URLSearchParams(window.location.search)
+    if (!params.has('q')) this.setQueryParam()
     this.setTimer()
     this.$refs.input.focus()
   },
