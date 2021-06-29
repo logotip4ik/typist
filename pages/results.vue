@@ -26,7 +26,7 @@
       <button
         ref="nextButton"
         class="button next"
-        @click="() => $router.push({ path: '/', query: { q: '' } })"
+        @click="() => $router.push({ path: '/text', params: { id: '' } })"
       >
         Next
       </button>
