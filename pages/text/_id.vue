@@ -104,9 +104,7 @@ export default {
       this.timer = 0
       this.maxWPM = 0
       this.$refs.input.value = ''
-      const params = new URLSearchParams(window.location.search)
-      params.delete('q')
-      window.history.replaceState({}, '', `?${params.toString()}`)
+      window.history.replaceState({}, '', `/text`)
       this.$nuxt.refresh().then(() => {
         this.setParam()
         this.$refs.input.focus()
