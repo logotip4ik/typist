@@ -149,7 +149,7 @@ export default {
             shareLink: window.location.toString(),
           }
           this.$router.push({
-            path: 'results',
+            name: 'results',
             query: { res: JSON.stringify(data) },
           })
         }

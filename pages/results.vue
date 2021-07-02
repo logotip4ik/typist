@@ -5,12 +5,7 @@
     <h3>max WPM - {{ results.maxWPM }}</h3>
     <h3>Time - {{ results.time }}</h3>
     <div class="buttons">
-      <button
-        class="button back"
-        @click="() => $router.push(results.shareLink)"
-      >
-        Back
-      </button>
+      <button class="button back" @click="() => goBack()">Back</button>
       <button
         class="button share"
         @click="() => copyTextToClipboard(results.shareLink)"
@@ -68,6 +63,11 @@ export default {
     this.$refs.nextButton.focus()
   },
   methods: {
+    goBack() {
+      return window.history.length > 1
+        ? this.$router.go(-1)
+        : this.$router.push('/')
+    },
     fallbackCopyTextToClipboard(text) {
       const textArea = document.createElement('textarea')
       textArea.value = text
