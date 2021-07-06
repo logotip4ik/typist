@@ -54,7 +54,7 @@ export default {
     WPMs: [],
     currLetter: 0,
     numWords: 0,
-    timer: 0,
+    timer: 1,
     maxWPM: 0,
   }),
   head() {
@@ -101,7 +101,7 @@ export default {
       this.WPMs = []
       this.currLetter = 0
       this.numWords = 0
-      this.timer = 0
+      this.timer = 1
       this.maxWPM = 0
       this.$refs.input.value = ''
       window.history.replaceState({}, '', `/text`)
