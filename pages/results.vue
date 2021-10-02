@@ -21,7 +21,7 @@
       <button
         ref="nextButton"
         class="button next"
-        @click="() => $router.push({ path: '/text', params: { id: '' } })"
+        @click="() => $router.push('/')"
       >
         Next
       </button>
