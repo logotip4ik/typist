@@ -127,9 +127,9 @@ export default {
             wpm: this.summedWPMs,
             text: this.rawText.join(''),
             author: this.authorText,
+            anime: this.animeName,
             time: this.timerText,
             maxWPM: this.maxWPM,
-            shareLink: window.location.toString(),
           }
           this.$router.push({
             name: 'results',
