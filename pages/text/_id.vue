@@ -16,7 +16,10 @@
       </p>
       <span class="main__text__info">
         <span>{{ currWPMText }}</span>
-        <span>By - {{ authorText }}</span>
+        <span>
+          By - {{ authorText }}
+          {{ animeName ? `From - ${animeName}` : '' }}
+        </span>
       </span>
       <input ref="input" class="main__input" @input="addValue" />
     </div>
@@ -36,18 +39,19 @@
 export default {
   transition: 'fade',
   async asyncData({ $axios, params }) {
-    const RANDOM_URL =
-      'https://api.quotable.io/random?minLength=50?maxLength=150'
+    const RANDOM_URL = 'https://animechan.vercel.app/api/random'
     const ID_URL = 'https://api.quotable.io/quotes/'
 
-    const url = params.id ? `${ID_URL}${decodeURI(params.id)}` : RANDOM_URL
-    const { data } = await $axios.get(url)
+    // const url = params.id ? `${ID_URL}${decodeURI(params.id)}` : RANDOM_URL
+    const url = RANDOM_URL
+    const data = await $axios.$get(url)
 
-    const rawText = data.content.split('')
-    const authorText = data.author
+    const rawText = data.quote.split('')
+    const authorText = data.character
+    const animeName = data.anime
     const idText = data._id
 
-    return { rawText, idText, authorText }
+    return { rawText, idText, authorText, animeName }
   },
   data: () => ({
     userText: [],
@@ -90,8 +94,6 @@ export default {
     },
   },
   mounted() {
-    const params = new URLSearchParams(window.location.search)
-    if (!params.has('q')) this.setParam()
     this.setTimer()
     this.$refs.input.focus()
   },
@@ -104,11 +106,7 @@ export default {
       this.timer = 1
       this.maxWPM = 0
       this.$refs.input.value = ''
-      window.history.replaceState({}, '', `/text`)
-      this.$nuxt.refresh().then(() => {
-        this.setParam()
-        this.$refs.input.focus()
-      })
+      this.$nuxt.refresh().then(() => this.$refs.input.focus())
     },
     setTimer() {
       setInterval(() => {
@@ -119,16 +117,11 @@ export default {
       window.history.replaceState('', '', `/text/${encodeURI(this.idText)}`)
     },
     isWordsCorrect() {
-      let isCorrect = true
-
       const range = this.rawText.slice(0, this.currLetter).length
-      for (let i = 0; i < range; i += 1) {
-        if (this.userText[i] !== this.rawText[i]) {
-          isCorrect = false
-          break
-        }
-      }
-      return isCorrect
+      for (let i = 0; i < range; i += 1)
+        if (this.userText[i] !== this.rawText[i]) return false
+
+      return true
     },
     addValue({ target, inputType, data }) {
       if (inputType === 'insertText') {
