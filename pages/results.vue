@@ -4,20 +4,9 @@
     <h1>WPM - {{ results.wpm }}</h1>
     <h3>max WPM - {{ results.maxWPM }}</h3>
     <h3>Time - {{ results.time }}</h3>
+    <h4>Anime - {{ results.anime }}</h4>
     <div class="buttons">
       <button class="button back" @click="() => goBack()">Back</button>
-      <button
-        class="button share"
-        @click="() => copyTextToClipboard(results.shareLink)"
-      >
-        Share Text Link
-      </button>
-      <button
-        class="button share"
-        @click="() => copyTextToClipboard(currentPath)"
-      >
-        Share Results
-      </button>
       <button
         ref="nextButton"
         class="button next"
@@ -68,29 +57,6 @@ export default {
         ? this.$router.go(-1)
         : this.$router.push('/')
     },
-    fallbackCopyTextToClipboard(text) {
-      const textArea = document.createElement('textarea')
-      textArea.value = text
-
-      // Avoid scrolling to bottom
-      textArea.style.top = '0'
-      textArea.style.left = '0'
-      textArea.style.position = 'fixed'
-
-      document.body.appendChild(textArea)
-      textArea.focus()
-      textArea.select()
-
-      try {
-        document.execCommand('copy')
-      } catch (err) {}
-
-      document.body.removeChild(textArea)
-    },
-    copyTextToClipboard(text) {
-      if (!navigator.clipboard) return this.fallbackCopyTextToClipboard(text)
-      navigator.clipboard.writeText(text)
-    },
   },
 }
 </script>
@@ -135,9 +101,6 @@ h3 {
     &:focus {
       transform: scale3d(1.05, 1.05, 1.05);
       box-shadow: 0 0 10px 0 rgba($color: whitesmoke, $alpha: 0.25);
-    }
-    &.share {
-      background-color: rgb(3, 0, 182);
     }
     &.back {
       background-color: rgb(168, 5, 86);
